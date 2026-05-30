@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: robotdb
+      MYSQL_USER: robot
+      MYSQL_PASSWORD: robotpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: robot
+      PMA_PASSWORD: robotpass
+    ports:
+      - "8080:80"
+
+  api:
+    build: .
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+pymysql://robot:robotpass@db:3306/robotdb
+    ports:
+      - "5000:5000"
+
+volumes:
+  mysql_data:
