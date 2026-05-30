@@ -31,7 +31,7 @@ services:
       PMA_USER: robot
       PMA_PASSWORD: robotpass
     ports:
-      - "8080:80"
+      - "5236:80"
 
   api:
     build: .
@@ -42,7 +42,7 @@ services:
     environment:
       DATABASE_URL: mysql+pymysql://robot:robotpass@db:3306/robotdb
     ports:
-      - "5000:5000"
+      - "5235:5000"
 
 volumes:
   mysql_data:
